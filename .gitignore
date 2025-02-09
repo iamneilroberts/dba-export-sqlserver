@@ -1,0 +1,50 @@
+# SQL Server files
+*.mdf
+*.ldf
+*.ndf
+
+# User-specific files
+*.user
+*.suo
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+
+# Visual Studio files
+.vs/
+*.vspscc
+*.vssscc
+
+# Backup & report files
+*.[Bb]ak
+*.bak
+*.temp
+*.tmp
+*.[Pp]ublish.xml
+*.publishsettings
+
+# Log files
+*.log
+*.trc
+*.trace
+
+# Package files
+*.dacpac
+*.bacpac
+
+# Other
+*.cache
+[Tt]emp/
+[Oo]bj/
+[Bb]in/
+[Dd]ebug/
+[Rr]elease/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
