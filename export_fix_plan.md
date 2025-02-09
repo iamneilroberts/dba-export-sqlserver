@@ -1,57 +1,68 @@
 # Export System Fix Plan
 
-## Current Issue
-The export system is failing validation with the error "Missing Related Records" for OrderItems table. This occurs because some OrderItems records are referencing Orders that are not included in the export set.
+## Current Issues
 
-## Analysis
-1. Current Configuration:
-   - Orders is configured as a transaction table with OrderDate
-   - OrderItems is configured as a non-transaction table
-   - The relationship between Orders and OrderItems is not properly handled
+1. **Redundant Code**
+   - initial_setup.sql and setup_exporttest.sql both create the same base tables
+   - Cleanup code duplicated between cleanup_master.sql and setup_exporttest.sql
+   - TableRelationships table definition inconsistent between scripts
 
-2. Validation Failure:
-   - The validation process checks parent-child relationships
-   - It found OrderItems records whose parent Orders are not in the export set
-   - This indicates Orders outside the date range need to be included
+2. **Missing Columns**
+   - ParentColumn and ChildColumn missing from TableRelationships in initial_setup.sql
+   - Causing errors in multiple stored procedures:
+     - sp_ProcessParentTables
+     - sp_GetTableRelationships
+     - sp_GenerateJoinClauses
+     - sp_ValidateRelationshipIntegrity
 
-## Solution Options
+3. **Incomplete Initial Setup**
+   - initial_setup.sql only creates tables and indexes
+   - Should create all core database objects per INDEX.md
 
-### Option 1: Modify Export Configuration
-Update the export configuration to properly handle the Orders-OrderItems relationship:
-```sql
-DELETE FROM dba.ExportConfig;
-INSERT INTO dba.ExportConfig (
-    SchemaName,
-    TableName,
-    IsTransactionTable,
-    DateColumnName,
-    ForceFullExport,
-    BatchSize
-)
-VALUES
-    ('dbo', 'Orders', 1, 'OrderDate', 0, 1000),        -- Transaction table with date range
-    ('dbo', 'OrderItems', 0, NULL, 1, 1000);           -- Force full export for OrderItems
-```
+## Fix Plan
 
-### Option 2: Expand Date Range
-If we need specific OrderItems, we could expand the date range for Orders to ensure all related records are included:
-```sql
-EXEC dba.sp_ExportData
-    @StartDate = '2023-12-01',  -- Extended start date
-    @EndDate = '2024-02-01',
-    @Debug = 1;
-```
+### 1. Restructure Initial Setup
+- Move all base table creation to initial_setup.sql
+- Include correct TableRelationships definition with ParentColumn/ChildColumn
+- Add stored procedure creation
+- Remove redundant table creation from setup_exporttest.sql
 
-### Recommendation
-I recommend implementing Option 1 first as it's a more robust solution. This ensures that:
-1. Orders are properly exported based on the date range
-2. All related OrderItems are included regardless of date
-3. Data integrity is maintained
+### 2. Clean Up Test Environment Setup
+- Focus setup_exporttest.sql on test data and configuration only
+- Remove redundant cleanup code
+- Keep test table creation and sample data insertion
+- Move cleanup code to cleanup_master.sql
+
+### 3. Script Organization
+- initial_setup.sql: Core database objects
+- cleanup_master.sql: All cleanup operations
+- setup_exporttest.sql: Test environment only
+
+### 4. Testing Approach
+Start with basic test using Orders table:
+1. Run initial_setup.sql to create core objects
+2. Run setup_exporttest.sql to create test environment
+3. Execute sp_ExportData with Orders table
+4. Verify exported data and relationships
 
 ## Implementation Steps
-1. Clear existing export configuration
-2. Add new configuration with proper relationship handling
-3. Run the export process
-4. Verify validation passes
 
-Would you like me to proceed with implementing this solution?
+1. Update initial_setup.sql:
+   - Add ParentColumn/ChildColumn to TableRelationships
+   - Add stored procedure creation
+   - Ensure all core objects are created
+
+2. Clean up setup_exporttest.sql:
+   - Remove redundant table creation
+   - Keep only test-specific code
+   - Update configuration for Orders table
+
+3. Update cleanup_master.sql:
+   - Consolidate cleanup operations
+   - Ensure proper cleanup order
+   - Add any missing cleanup steps
+
+4. Verify stored procedures:
+   - Confirm ParentColumn/ChildColumn usage
+   - Test relationship management
+   - Validate export process

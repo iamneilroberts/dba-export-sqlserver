@@ -152,14 +152,14 @@ BEGIN
             tr.ParentTable,
             tr.ParentColumn,
             tr.ChildColumn,
-            ROW_NUMBER() OVER (ORDER BY tr.RelationshipLevel) as RowNum
+            ROW_NUMBER() OVER (ORDER BY tr.RelationshipLevel) as RowNum,
+            CASE WHEN ec.IsTransactionTable = 1 THEN 1 ELSE 0 END as IsTransactionParent
         FROM dba.TableRelationships tr
-        INNER JOIN dba.ExportConfig ec 
+        LEFT JOIN dba.ExportConfig ec 
             ON tr.ParentSchema = ec.SchemaName 
             AND tr.ParentTable = ec.TableName
         WHERE tr.ChildSchema = @SchemaName
         AND tr.ChildTable = @TableName
-        AND ec.IsTransactionTable = 1
     )
     SELECT @JoinClauses = STRING_AGG(
         'INNER JOIN ' + QUOTENAME(ParentSchema) + '.' + QUOTENAME(ParentTable) + ' p' + 

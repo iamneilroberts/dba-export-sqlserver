@@ -171,3 +171,95 @@
     - Eliminated duplicate error messages
     - Improved error message clarity
     - Added structured validation result handling
+
+## 2024-02-08 (14)
+- Set up GitHub repository for version control:
+  - Created .gitignore for SQL Server specific files
+  - Initialized git repository with 'main' branch
+  - Created public GitHub repository: dba-export-sqlserver
+  - Configured GitHub CLI and authentication
+  - Pushed initial codebase to GitHub
+  - Repository URL: https://github.com/iamneilroberts/dba-export-sqlserver
+
+## 2024-02-08 (15)
+- Reorganized scripts and fixed ParentColumn/ChildColumn issues:
+  - Consolidated all base object creation in initial_setup.sql:
+    - Added correct TableRelationships definition with ParentColumn/ChildColumn
+    - Added proper stored procedure creation order based on dependencies
+    - Added user-defined type creation
+  - Cleaned up setup_exporttest.sql:
+    - Removed redundant table creation
+    - Focused purely on test data and configuration
+    - Kept test table creation and sample data insertion
+  - Enhanced cleanup_master.sql:
+    - Consolidated all cleanup operations
+    - Added proper object drop order
+    - Added stored procedure and type cleanup
+  - Fixed ParentColumn/ChildColumn issues:
+    - Added missing columns to TableRelationships table
+    - Ensured proper column usage in:
+      - sp_ProcessParentTables
+      - sp_GetTableRelationships
+      - sp_GenerateJoinClauses
+      - sp_ValidateRelationshipIntegrity
+
+## 2024-02-08 (16)
+- Implemented Transaction Table Analyzer:
+  - Created sp_AnalyzeTransactionTables stored procedure:
+    - Analyzes tables for transaction patterns
+    - Scores tables based on multiple criteria:
+      * Name patterns (Orders, Transactions, etc.)
+      * Date columns and indexes
+      * Relationships with other tables
+      * Column patterns (Status, Amount, etc.)
+    - Generates confidence scores (0.0-1.0)
+    - Suggests date columns for filtering
+    - Provides detailed analysis output
+  - Added test framework in test_analyzer.sql:
+    - Creates test tables with various patterns:
+      * Clear transaction tables (Orders)
+      * Related tables (OrderItems)
+      * Staging tables (STG_Orders)
+      * Unclear names (TBL_123_MAIN)
+      * Lookup tables (Products)
+    - Inserts sample data with date ranges
+    - Tests relationship detection
+  - Results from test run:
+    - Correctly identified Orders as transaction table (0.80 confidence):
+      * Has OrderDate column with index
+      * Clear naming pattern
+      * Proper relationships
+      * Transaction-related columns
+    - Properly scored related tables lower:
+      * OrderItems (0.20): Related but no dates
+      * STG_Orders (0.20): Has dates but staging
+    - Generated appropriate configuration scripts
+    - Validated export results:
+      * Exported 4 orders in date range
+      * Maintained relationships
+      * Proper validation warnings
+
+## 2024-02-08 (17)
+- Added documentation for transaction table analysis:
+  - Created transaction_table_analyzer_plan.md:
+    - Documents analyzer design
+    - Details scoring system
+    - Lists supported patterns
+  - Created analyzer_test_plan.md:
+    - Defines test scenarios
+    - Lists edge cases
+    - Specifies validation criteria
+  - Created database_analysis_workflow.md:
+    - Documents analysis process
+    - Provides usage examples
+    - Lists best practices
+
+## 2024-02-08 (18)
+- Updated GitHub repository with latest changes:
+  - Added new files:
+    - sql/sp_AnalyzeTransactionTables.sql
+    - sql/test_analyzer.sql
+    - docs/transaction_table_analyzer_plan.md
+    - docs/analyzer_test_plan.md
+    - docs/database_analysis_workflow.md
+  - Repository URL: https://github.com/iamneilroberts/dba-export-sqlserver

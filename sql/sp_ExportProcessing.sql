@@ -139,18 +139,18 @@ BEGIN
         s.name AS SchemaName
     FROM sys.tables t
     INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
-    LEFT JOIN dba.ExportConfig ec ON s.name = ec.SchemaName AND t.name = ec.TableName
+    INNER JOIN sys.foreign_keys fk ON fk.parent_object_id = t.object_id
+    INNER JOIN sys.tables pt ON fk.referenced_object_id = pt.object_id
+    INNER JOIN sys.schemas ps ON pt.schema_id = ps.schema_id
+    INNER JOIN dba.ExportConfig ec ON ps.name = ec.SchemaName AND pt.name = ec.TableName
     WHERE t.is_ms_shipped = 0
     AND s.name != 'dba'
-    AND (ec.IsTransactionTable = 0 OR ec.IsTransactionTable IS NULL)
-    AND EXISTS (
+    AND ec.IsTransactionTable = 1
+    AND NOT EXISTS (
         SELECT 1 
-        FROM dba.TableRelationships tr
-        INNER JOIN dba.ExportConfig ec2 
-            ON tr.ParentSchema = ec2.SchemaName 
-            AND tr.ParentTable = ec2.TableName
-        WHERE tr.ChildSchema = s.name
-        AND tr.ChildTable = t.name
+        FROM dba.ExportConfig ec2 
+        WHERE ec2.SchemaName = s.name 
+        AND ec2.TableName = t.name 
         AND ec2.IsTransactionTable = 1
     )
     ORDER BY s.name, t.name;
@@ -186,6 +186,15 @@ BEGIN
                 @ExportID = @ExportID,
                 @JoinClauses = @JoinClauses OUTPUT,
                 @Debug = @Debug;
+
+            IF @Debug = 1 AND @JoinClauses IS NULL
+            BEGIN
+                SET @msg = CONCAT(
+                    'Warning: No join clauses generated for ', @SchemaName, '.', @TableName, CHAR(13), CHAR(10),
+                    'This may result in missing related records'
+                );
+                RAISERROR(@msg, 0, 1) WITH NOWAIT;
+            END
 
             -- Build and execute insert statement
             SET @SQL = N'
