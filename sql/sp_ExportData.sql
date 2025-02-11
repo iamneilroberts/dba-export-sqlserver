@@ -152,7 +152,7 @@ BEGIN
             AND i.object_id = OBJECT_ID(@ParentSchema + '.' + @ParentTable);
 
             -- Create export table for parent
-            DECLARE @ExportTableName nvarchar(256) = '[dba].[Export_' + @ParentSchema + '_' + @ParentTable + ']';
+            DECLARE @ExportTableName nvarchar(256) = QUOTENAME('dba') + '.' + QUOTENAME('Export_' + @ParentSchema + '_' + @ParentTable);
             
             -- Drop if exists
             IF OBJECT_ID(@ExportTableName, 'U') IS NOT NULL
@@ -252,7 +252,7 @@ BEGIN
                 Category, ' (', Severity, '): ',
                 SchemaName, '.', TableName,
                 CASE 
-                    WHEN RecordCount IS NOT NULL THEN ' - ' + CAST(RecordCount AS varchar(20)) + ' records affected'
+                    WHEN TableSize IS NOT NULL THEN ' - ' + CAST(TableSize AS varchar(20)) + ' records affected'
                     ELSE ''
                 END,
                 ' - ', Details

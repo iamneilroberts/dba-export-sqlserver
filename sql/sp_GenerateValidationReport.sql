@@ -38,7 +38,7 @@ BEGIN
             Severity,
             COUNT(*) as IssueCount,
             COUNT(DISTINCT SchemaName + '.' + TableName) as TablesAffected,
-            SUM(ISNULL(RecordCount, 0)) as TotalRecordsAffected
+            SUM(ISNULL(TableSize, 0)) as TotalRecordsAffected
         FROM dba.ValidationResults
         WHERE ExportID = @ExportID
         GROUP BY Severity
@@ -100,7 +100,7 @@ BEGIN
             ValidationType,
             Severity,
             Category,
-            RecordCount as AffectedRecords,
+            TableSize as AffectedRecords,
             Details,
             CASE WHEN @IncludeQueries = 1 THEN ValidationQuery ELSE NULL END as ValidationQuery
         FROM dba.ValidationResults
@@ -144,7 +144,7 @@ BEGIN
                         v.ValidationType,
                         v.Severity,
                         v.Category,
-                        v.RecordCount as AffectedRecords,
+                        v.TableSize as AffectedRecords,
                         v.Details,
                         CASE WHEN @IncludeQueries = 1 THEN v.ValidationQuery ELSE NULL END as ValidationQuery
                     FROM dba.ValidationResults v

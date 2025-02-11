@@ -1,4 +1,3 @@
--- Create stored procedure for managing manual relationships
 CREATE OR ALTER PROCEDURE dba.sp_ManageRelationship
     @Action varchar(10), -- 'ADD', 'UPDATE', 'REMOVE'
     @ParentSchema nvarchar(128),

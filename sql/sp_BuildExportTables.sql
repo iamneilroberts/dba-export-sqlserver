@@ -26,6 +26,8 @@ BEGIN
         -- First process parent tables to maintain referential integrity
         EXEC dba.sp_ProcessParentTables
             @ExportID = @ExportID,
+            @StartDate = @StartDate,
+            @EndDate = @EndDate,
             @Debug = @Debug;
             
         -- Then process transaction tables

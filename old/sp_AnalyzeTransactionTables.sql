@@ -1,4 +1,3 @@
-
 CREATE OR ALTER PROCEDURE dba.sp_AnalyzeTransactionTables
     @MinimumRows int = 1000,              -- Minimum rows for consideration
     @ConfidenceThreshold decimal(5,2) = 0.5,  -- Minimum confidence score

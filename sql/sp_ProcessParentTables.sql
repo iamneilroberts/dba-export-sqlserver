@@ -1,18 +1,4 @@
--- Create table type for parent table information if it doesn't exist
-IF NOT EXISTS (SELECT * FROM sys.types WHERE name = 'ParentTableType' AND is_table_type = 1)
-BEGIN
-    CREATE TYPE dba.ParentTableType AS TABLE
-    (
-        SchemaName nvarchar(128),
-        TableName nvarchar(128),
-        ChildSchema nvarchar(128),
-        ChildTable nvarchar(128),
-        ParentColumn nvarchar(128),
-        ChildColumn nvarchar(128),
-        DateColumn nvarchar(128)
-    );
-END
-GO
+
 
 CREATE OR ALTER PROCEDURE dba.sp_ProcessParentTables
     @ExportID int,

@@ -11,15 +11,38 @@ This document provides an overview of all SQL scripts in the DateExport project,
   - ExportTest database
   - dba schema
 
-### Setup Test Environment
-- **File:** `setup_exporttest.sql`
-- **Purpose:** Creates test database structure and sample data
-- **Objects Created:**
-  - Test tables (Customers, Orders, OrderItems, CustomerNotes)
-  - Sample data
-  - Initial configuration
-
 ## Core Stored Procedures
+
+### Database Structure Analysis
+- **File:** `sp_AnalyzeDatabaseStructure.sql`
+- **Purpose:** Main procedure for analyzing database structure and identifying transaction tables
+- **Objects Created:**
+  - dba.sp_AnalyzeDatabaseStructure
+- **Features:**
+  - Automated transaction table detection
+  - Confidence scoring based on multiple factors
+  - Parent table identification
+  - Comprehensive analysis reporting
+
+### Date Column Analysis
+- **File:** `sp_AnalyzeDateColumns.sql`
+- **Purpose:** Analyzes and identifies date-based columns for export criteria
+- **Objects Created:**
+  - dba.sp_AnalyzeDateColumns
+- **Features:**
+  - Date column pattern recognition
+  - Index analysis for performance
+  - Date format validation
+
+### Table Relationships
+- **File:** `sp_AnalyzeTableRelationships.sql`
+- **Purpose:** Maps and manages table relationships
+- **Objects Created:**
+  - dba.sp_AnalyzeTableRelationships
+- **Features:**
+  - Foreign key relationship detection
+  - Relationship depth analysis
+  - Circular reference detection
 
 ### Export Processing
 - **File:** `sp_ExportData.sql`
@@ -32,18 +55,6 @@ This document provides an overview of all SQL scripts in the DateExport project,
   - sp_AnalyzeDatabaseStructure
   - sp_AnalyzeTableRelationships
 
-### Table Analysis
-- **File:** `sp_AnalyzeDatabaseStructure.sql`
-- **Purpose:** Analyzes database structure to identify transaction tables
-- **Objects Created:**
-  - dba.sp_AnalyzeDatabaseStructure
-
-### Relationship Management
-- **File:** `sp_AnalyzeTableRelationships.sql`
-- **Purpose:** Maps and manages table relationships
-- **Objects Created:**
-  - dba.sp_AnalyzeTableRelationships
-
 ### Export Table Building
 - **File:** `sp_BuildExportTables.sql`
 - **Purpose:** Creates and populates export tables
@@ -51,10 +62,32 @@ This document provides an overview of all SQL scripts in the DateExport project,
   - dba.sp_BuildExportTables
 - **Dependencies:**
   - sp_ProcessParentTables
-  - sp_ProcessTransactionTables
   - sp_ProcessRelatedTables
 
-## Parent Table Processing
+### Export Processing Control
+- **File:** `sp_ExportProcessing.sql`
+- **Purpose:** Manages the export process workflow
+- **Objects Created:**
+  - dba.sp_ExportProcessing
+- **Features:**
+  - Progress tracking
+  - Error handling
+  - Performance monitoring
+
+## Relationship Management
+
+### Manual Relationship Management
+- **File:** `sp_RelationshipManagement.sql`
+- **Purpose:** Manages manual table relationships
+- **Objects Created:**
+  - dba.sp_ManageRelationship
+  - dba.vw_ActiveManualRelationships
+- **Features:**
+  - Add/Update/Remove relationships
+  - Relationship validation
+  - Active relationship tracking
+
+## Table Processing
 
 ### Parent Table Types
 - **File:** `sp_ParentTableTypes.sql`
@@ -63,12 +96,40 @@ This document provides an overview of all SQL scripts in the DateExport project,
   - dba.ParentTableType (User-Defined Table Type)
 
 ### Parent Table Processing
-- **File:** `sp_ParentTableProcessing.sql`
+- **File:** `sp_ProcessParentTables.sql`
 - **Purpose:** Handles parent table exports
 - **Objects Created:**
   - dba.sp_ProcessParentTables
 - **Dependencies:**
   - ParentTableType
+
+### Related Table Processing
+- **File:** `sp_ProcessRelatedTables.sql`
+- **Purpose:** Processes tables related to transaction tables
+- **Objects Created:**
+  - dba.sp_ProcessRelatedTables
+
+## Table Classification
+
+### Table Classification
+- **File:** `sp_TableClassification.sql`
+- **Purpose:** Classifies tables based on their characteristics
+- **Objects Created:**
+  - dba.sp_TableClassification
+- **Features:**
+  - Pattern-based classification
+  - Usage analysis
+  - Data volume consideration
+
+### Classification Updates
+- **File:** `sp_UpdateTableClassification.sql`
+- **Purpose:** Updates table classifications based on new data
+- **Objects Created:**
+  - dba.sp_UpdateTableClassification
+- **Features:**
+  - Classification refinement
+  - Historical tracking
+  - Change logging
 
 ## Validation System
 
@@ -98,24 +159,23 @@ This document provides an overview of all SQL scripts in the DateExport project,
 - **Objects Created:**
   - Various utility functions and procedures
 
-### Cleanup
-- **File:** `cleanup_master.sql`
-- **Purpose:** Cleanup script for removing test data and resetting the system
-- **Actions:**
-  - Drops test tables
-  - Cleans up export tables
-  - Resets configuration
-
 ## Testing
 
-### Test System
-- **File:** `test_export_system.sql`
-- **Purpose:** Test script with various export scenarios
+### Test Scripts
+- **File:** `test_analyzer.sql`
+- **Purpose:** Tests for the analysis system
 - **Contents:**
-  - Basic usage examples
-  - Automatic analysis tests
-  - Manual configuration tests
-  - Validation report examples
+  - Analysis procedure tests
+  - Configuration validation
+  - Performance testing
+
+### Table Classification Tests
+- **File:** `test_table_classification.sql`
+- **Purpose:** Tests for the classification system
+- **Contents:**
+  - Classification accuracy tests
+  - Pattern matching validation
+  - Edge case handling
 
 ## Best Practices for Maintaining This Index
 
@@ -138,3 +198,19 @@ This document provides an overview of all SQL scripts in the DateExport project,
    - List all dependencies for each script
    - Note required execution order
    - Document any configuration requirements
+
+## Obsolete Scripts (Moved to /old)
+
+The following scripts have been moved to the /old directory as they have been superseded by newer versions:
+
+1. **sp_TableAnalysis.sql**
+   - Replaced by: sp_AnalyzeDatabaseStructure.sql
+   - Reason: Functionality consolidated into more robust implementation
+
+2. **sp_AnalyzeTransactionTables.sql**
+   - Replaced by: sp_AnalyzeDatabaseStructure.sql
+   - Reason: Less comprehensive scoring system and lacks parent table detection
+
+3. **sp_ManageRelationship.sql**
+   - Replaced by: sp_RelationshipManagement.sql
+   - Reason: Duplicate functionality
